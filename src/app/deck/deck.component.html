@@ -1,0 +1,186 @@
+<div class="tabletop-container">
+  <main class="deck-page">
+    <div class="page-actions">
+      <button class="home-link" type="button" (click)="backToHome.emit()">
+        <span aria-hidden="true">←</span> {{ text('backHome') }}
+      </button>
+      <nav class="language-switch" [attr.aria-label]="text('languageLabel')">
+        <button class="home-link" type="button" [class.active]="language === 'en'" (click)="languageChange.emit('en')">EN</button>
+        <span aria-hidden="true">·</span>
+        <button class="home-link" type="button" [class.active]="language === 'es'" (click)="languageChange.emit('es')">ES</button>
+      </nav>
+    </div>
+
+    <header class="page-header">
+      <div class="brand-seal" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="41"></circle>
+          <circle cx="50" cy="50" r="32"></circle>
+          <path d="M50 14v13m0 46v13M14 50h13m46 0h13M24.5 24.5l9.2 9.2m32.6 32.6 9.2 9.2m0-51-9.2 9.2M33.7 66.3l-9.2 9.2"></path>
+          <path d="M50 32 55.4 45 68 50l-12.6 5.4L50 68l-5.4-12.6L32 50l12.6-5L50 32Z"></path>
+          <circle cx="50" cy="50" r="4"></circle>
+        </svg>
+      </div>
+      <p class="eyebrow">{{ text('pageEyebrow') }}</p>
+      <h1><span>{{ deckTitle() }}</span></h1>
+      <p class="page-intro">{{ text('pageIntro') }}</p>
+      <div class="header-rule" aria-hidden="true"><span>✦</span></div>
+    </header>
+
+    <section class="session-panel" [attr.aria-label]="text('savedSessions')">
+      <div class="session-form" *ngIf="!activeSession">
+        <div>
+          <p class="eyebrow">{{ text('savedSessionsEyebrow') }}</p>
+          <label for="sessionName">{{ text('sessionNameLabel') }}</label>
+        </div>
+        <div class="session-create-controls">
+          <input
+            id="sessionName"
+            type="text"
+            maxlength="80"
+            [placeholder]="text('sessionNamePlaceholder')"
+            [(ngModel)]="sessionName"
+            (keyup.enter)="createSession()"
+          />
+          <button type="button" (click)="createSession()">{{ text('createSession') }}</button>
+        </div>
+      </div>
+      <div class="session-switcher" *ngIf="availableSessions.length">
+        <label for="sessionToSwitch">{{ text('switchSession') }}</label>
+        <select id="sessionToSwitch" [(ngModel)]="sessionToSwitchId">
+          <option *ngFor="let session of availableSessions" [value]="session.id">
+            {{ session.name }} · {{ session.deckSet === 'Original' ? text('originalSet') : session.deckSet === 'More Things' ? text('moreSet') : text('allSet') }}
+          </option>
+        </select>
+        <button type="button" (click)="switchSession()" [disabled]="!sessionToSwitchId || sessionToSwitchId === activeSession?.id">
+          {{ text('switchSession') }}
+        </button>
+      </div>
+      <div class="active-session" *ngIf="activeSession">
+        <div class="active-session-title">
+          <p class="eyebrow">{{ text('activeSession') }}</p>
+          <h2>{{ activeSession.name }}</h2>
+          <span>
+            {{ activeSession.history.length }}
+            {{ activeSession.history.length === 1 ? text('historyDrawSingular') : text('historyDrawPlural') }}
+          </span>
+        </div>
+        <div class="session-tools">
+          <p>{{ text('historyKeptNotice') }}</p>
+          <div>
+            <button type="button" (click)="resetDrawnCards()">{{ text('resetDrawnCards') }}</button>
+            <button type="button" (click)="clearHistory()">{{ text('clearHistory') }}</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="draw-panel" [attr.aria-label]="text('draw')">
+      <div class="panel-heading">
+        <span class="panel-glyph" aria-hidden="true">☽</span>
+        <div>
+          <p class="eyebrow">{{ text('readingTable') }}</p>
+          <span class="panel-caption">{{ text('panelCaption') }}</span>
+        </div>
+      </div>
+
+      <div class="deck-counter" aria-live="polite">
+        <span class="counter-icon" aria-hidden="true">✧</span>
+        <span class="counter-copy">
+          <strong>{{ deckService.remainingCards }}</strong>
+          <span>{{ text('cardsInDeck') }}</span>
+        </span>
+      </div>
+
+      <div class="draw-controls">
+        <label for="drawCount">{{ text('chooseFate') }}</label>
+        <div class="draw-actions">
+          <input
+            id="drawCount"
+            type="number"
+            min="1"
+            [max]="deckService.remainingCards"
+            [(ngModel)]="cardsToDraw"
+          />
+          <button
+            type="button"
+            (click)="onDraw()"
+            [disabled]="deckService.remainingCards === 0"
+          >
+            <span class="button-sparkle" aria-hidden="true">✦</span>
+            {{ text('draw') }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <p class="error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <section class="reading" aria-live="polite" [attr.aria-label]="text('revealedArcana')">
+      <div class="section-heading" *ngIf="drawnCards.length">
+        <div>
+          <p class="eyebrow">{{ text('readingEyebrow') }}</p>
+          <h2>{{ text('revealedArcana') }}</h2>
+        </div>
+        <span class="reading-count">
+          <span aria-hidden="true">✧</span>
+          {{ drawnCards.length }} {{ text('revealed') }}
+        </span>
+      </div>
+
+      <div class="cards-grid" *ngIf="drawnCards.length; else welcome">
+        <article
+          class="card"
+          *ngFor="let result of drawnCards"
+          [ngClass]="'card--' + cardPaletteFor(result.card.Name)"
+        >
+          <div class="card-inner">
+            <div class="card-border" aria-hidden="true"></div>
+            <div class="card-topline">
+              <span class="draw-number">{{ text('drawNumber') }} {{ result.drawNumber.toString().padStart(2, '0') }}</span>
+              <span class="set-badge">{{ deckSetName(result.card.Set) }}</span>
+            </div>
+
+            <div class="card-art" aria-hidden="true">
+              <div class="art-frame">
+                <span class="art-corner art-corner--top">✦</span>
+                <svg class="arcane-art" viewBox="0 0 200 200">
+                  <circle class="art-orbit art-orbit--outer" cx="100" cy="100" r="79"></circle>
+                  <circle class="art-orbit art-orbit--inner" cx="100" cy="100" r="67"></circle>
+                  <path class="art-cardinal" d="M100 9v18m0 146v18M9 100h18m146 0h18"></path>
+                  <path class="art-diamond" d="M100 34 166 100 100 166 34 100 100 34Z"></path>
+                  <svg class="card-illustration" x="53" y="53" width="94" height="94" viewBox="0 0 100 100">
+                    <use [attr.href]="'assets/card-icons.svg#' + cardIconFor(result.card.Name)"></use>
+                  </svg>
+                </svg>
+                <span class="art-corner art-corner--bottom">✧</span>
+              </div>
+            </div>
+
+            <div class="card-heading">
+              <h2>{{ cardName(result.card.Name) }}</h2>
+              <span class="heading-rule" aria-hidden="true"></span>
+            </div>
+
+            <p class="card-description">{{ cardDescription(result.card.Name, result.card.Description) }}</p>
+
+            <div class="card-footer" [ngClass]="{ 'consumed': result.consumed }">
+              <span class="status-dot" aria-hidden="true"></span>
+              {{ result.consumed ? text('leavesDeck') : text('returnsDeck') }}
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <ng-template #welcome>
+        <div class="welcome-state">
+          <span class="welcome-star" aria-hidden="true">✧</span>
+          <h2>{{ text('welcomeTitle') }}</h2>
+          <p>{{ text('welcomeDescription') }}</p>
+        </div>
+      </ng-template>
+    </section>
+
+    <footer class="page-footer"><span>✦</span> {{ text('footer') }} <span>✦</span></footer>
+  </main>
+</div>
