@@ -4,6 +4,14 @@ Aplicación de escritorio para sacar cartas del *Deck of Many More Things*. Proy
 
 La aplicación está disponible en español e inglés. Permite elegir entre el mazo original de 22 cartas, el ampliado de 44 cartas o el mazo completo de 66 cartas, y guardar sesiones con el historial de cartas extraídas.
 
+## Naturaleza del proyecto y propiedad intelectual
+
+Este es un proyecto personal, creado por hobby y para experimentar con IA. **No tiene fines de lucro ni comerciales**: no se cobra por descargarlo o usarlo, y no se ofrece como producto comercial.
+
+Dungeons & Dragons, D&D y *Deck of Many Things*, junto con sus marcas, nombres y materiales asociados, pertenecen a sus respectivos titulares, incluido Wizards of the Coast cuando corresponda. Este proyecto es independiente, no está afiliado, patrocinado ni aprobado por Wizards of the Coast ni por sus empresas relacionadas.
+
+El proyecto puede contener nombres, conceptos u otros materiales asociados con Dungeons & Dragons. Su carácter gratuito y no comercial no significa que esos materiales sean de dominio público ni garantiza por sí solo que su uso o distribución esté autorizado. Si eres titular de derechos y consideras que algún contenido debe modificarse o retirarse, contacta al mantenedor mediante los canales de este repositorio. Esta aclaración no sustituye asesoramiento legal ni concede derechos sobre materiales de terceros.
+
 ## Descargar e instalar
 
 Descarga el instalador correspondiente a tu sistema desde [GitHub Releases](../../releases/latest). No descargues instaladores adjuntos a comentarios, mensajes o sitios de terceros.
